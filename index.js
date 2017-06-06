@@ -36,7 +36,7 @@ let App = (function ( grabPluginFrom ) {
         
         let defaultObject = extend({
             
-            id : this.generateSafeStringOfLength(32),
+            id : this.generateUUID(),
             logging : false,
             // Mute this line to, may use callbacks in future.
             // callbacks : { success : function () {}, error : function (err) { if (err) console.error(err); } },
@@ -320,7 +320,7 @@ let App = (function ( grabPluginFrom ) {
     constructor.prototype.startServer = function ( setUpFunction, usesSockets ) {
         
         this.logger("Starting Express server...");
-        usesSockets && this.logger("Creating Sockets compatible server...")
+        usesSockets && this.logger("Creating Sockets compatible server...");
         
         let server = express();
         
@@ -349,58 +349,26 @@ let App = (function ( grabPluginFrom ) {
     /* Generation functions */
     
     /** App.generateID, App.regenerateID
-     *  Regenerates an App's ID string with App.generateSafeStringOfLength => (32, false)
+     *  Regenerates an App's ID string with App.generateUUID => (32, false)
      *  @return {App}
      */
     
     constructor.prototype.generateID =
     constructor.prototype.regenerateID = function () {
         
-        this.id = this.generateSafeStringOfLength(32);
+        this.id = this.generateUUID();
         
         return this;
         
     };
     
-    /** App.generateSafeStringOfLength
-     *  Generates a random AlphaNumeric string based on a given length that is safe to process.
-     *  @param {Number} The max length of the String to generate.
-     *  @param {Boolean} Allow the function to generate a String with Case Sensitive characters.
-     *  @private, static
+    /** App.generateUUID
+     *  Generates a random UUID that is safe to process.
+     *  @link https://gist.githubusercontent.com/LeverOne/1308368/raw/dd5e6568c10118f4d8303b59cef184549fb6eafb/index.js
      *  @return {String}
      */
     
-    constructor.prototype.generateSafeStringOfLength = function ( length, isCaseSensitive ) {
-        isCaseSensitive = typeof isCaseSensitive === "undefined" && true;
-        let multiplier = 1;
-        let abc = "abcdefghijklmnopqrstuvwxyz";
-        let possible = (isCaseSensitive && abc.toUpperCase()) + abc + "0123456789";
-        let text = "";
-        
-        for ( var i=0; i < length; i++ ) {
-            text += possible.charAt(Math.floor(Math.random() * possible.length));
-            let multiplication = ((length * multiplier)/8)-1;
-            // this is a heavy check; TODO: Optimise this check to be lighter
-            if ( i !== length-1 && (isEven(length) && isInt(multiplication)) && i === (multiplication) ) {
-                multiplier++;
-                text+="-";
-            }
-        }
-        
-        function isEven (n) {
-            return ( n % 2 == 0 ) && true;
-        }
-        
-        function isOdd (n) {
-            return Math.abs(n % 2) == 1;
-        }
-        
-        function isInt (n) {
-            return n % 1 === 0;
-        }
-        
-        return text;
-    }
+    constructor.prototype.generateUUID = function(a,b){for(b=a='';a++<36;b+=a*51&52?(a^15?8^Math.random()*(a^20?16:4):4).toString(16):'-');return b};
     
     /* Utils */
     
