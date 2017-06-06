@@ -14,3 +14,16 @@
 	    },
 	    {Internal}Messages : {Array} // logged messages can be accessed here if logging is set to false
 	}
+
+### Starting a server
+
+    const App = require("blue-eyeswhitedragon-app-generic");
+    
+    let app = new App({
+        logging : true,
+        workingDirectory : __dirname
+    }).startServer(server => {
+        server.get("/", (req, res) => {
+            res.render("pages/index");
+        });
+    });
