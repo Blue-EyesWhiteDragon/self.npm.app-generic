@@ -336,12 +336,10 @@ module.exports = (function ( grabPluginFrom ) {
             server.set("view engine", "ejs");
         }
         
-        function middleware ( before, after ) {
-            if ( before.constructor.name.indexOf("Array") > -1 ) for ( let j=0; j < before.length; j++ ) server.use(before[j]);
+        function middleware () {
             server.use(express.static(self.workingDirectory + "/public"));
             server.use(bodyParser.json()); // support json encoded bodies
             server.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
-            if ( after.constructor.name.indexOf("Array") > -1 ) for ( let j=0; j < after.length; j++ ) server.use(after[j]);
         }
         
         function start () {
