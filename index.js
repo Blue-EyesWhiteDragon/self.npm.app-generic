@@ -9,7 +9,6 @@
 
 const express = require("express");
 const path = require("path");
-const fs = require("fs");
 const bodyParser = require("body-parser");
 const httpRequest = require("request-promise-native");
 const styleMe = require("styleme");
@@ -23,7 +22,7 @@ const styleMe = require("styleme");
  *  @return App
  */
 
-let App = (function ( grabPluginFrom ) {
+module.exports = (function ( grabPluginFrom ) {
     
     /** App.constructor
      *  @public, constructor
@@ -53,17 +52,17 @@ let App = (function ( grabPluginFrom ) {
         
         // log the creation of the object if defaultObject.logging is true
         
-        this.creationLog(defaultObject);
+        this.__creationLog(defaultObject);
         
         // scan and activate plugins
         
-        this.scanPlugins(defaultObject);
+        this.__scanPlugins(defaultObject);
         
         // extend the object with the newly extended defaultObject (do not overwrite, as it will mess with the internal functions and props)
         
         extend(this, defaultObject, false);
         
-        this.importantLogger("Successful initialization of App!");
+        this.__importantLogger("Successful initialization of App!");
         
         return this;
     };
@@ -75,15 +74,16 @@ let App = (function ( grabPluginFrom ) {
      */
     
     constructor.prototype.logger =
-    constructor.prototype.importantLogger = function () {
+    constructor.prototype.__importantLogger = function () {
         return this.messages ? this.messages.push(convertArgs(arguments).join(" ")) : this.messages = ([]).push(convertArgs(arguments).join(" "));
     };
     
-    /** App.creationLog
+    /** App.__creationLog
      *  @param {Boolean}
+     *  @private
      */
     
-    constructor.prototype.creationLog = (function ( c ) {
+    constructor.prototype.__creationLog = (function ( c ) {
         
         return function ( defaultObject ) {
             
@@ -98,7 +98,7 @@ let App = (function ( grabPluginFrom ) {
                     let
                         matches = [],
                         matchObj = function ( regex, color ) { return { match : String.match(regex), color : color }; },
-                        prefab = style("[App id=", "blu,bri") + style(defaultObject.id, "mag,bri") + style("]", "blu,bri"),
+                        prefab = style("[App id=", "blu,bri") + style(this.id || defaultObject.id, "mag,bri") + style("]", "blu,bri"),
                         newString = String
                     ;
                     
@@ -119,11 +119,11 @@ let App = (function ( grabPluginFrom ) {
                     
                 };
                 
-                this.importantLogger = function () {
+                this.__importantLogger = function () {
                     this.logger.call(this, style(convertArgs(arguments).join(" "), "bri"));
                 };
                 
-                this.importantLogger("Logging has been enabled, App will now log processes");
+                this.__importantLogger("Logging has been enabled, App will now log processes");
             }
             
         };
@@ -186,13 +186,13 @@ let App = (function ( grabPluginFrom ) {
     
     /* Plugins */
     
-    /** App.scanPlugins
+    /** App.__scanPlugins
      *  Scans for plugins
      *  @param {Object}
-     *  @public, method
+     *  @private, method
      */
     
-    constructor.prototype.scanPlugins = function ( defaultObject ) {
+    constructor.prototype.__scanPlugins = function ( defaultObject ) {
         
         for ( let key in defaultObject.plugins ) {
             let path = ( defaultObject.pluginOptions.path || defaultObject.pluginPath ) + "/" + key + ".js";
@@ -314,6 +314,8 @@ let App = (function ( grabPluginFrom ) {
     /* Server */
     
     /** App.startServer
+     *  Allows you create your own defined express server, with or without basic setup predefined.
+     *  use init, middleware and next functions in your callback to use predefined setups.
      *  @public, method
      */
     
@@ -323,23 +325,44 @@ let App = (function ( grabPluginFrom ) {
         usesSockets && this.logger("Creating Sockets compatible server...");
         
         let server = express();
+        let self = this;
         
-        server.set("port", (process.env.PORT || 5000));
+        function init () {
+            // port
+            server.set("port", (process.env.PORT || 5000));
+            
+            // views is directory for all template files
+            server.set("views", self.workingDirectory + "/views");
+            server.set("view engine", "ejs");
+        }
         
-        server.use(express.static(this.workingDirectory + "/public"));
-        server.use(bodyParser.json()); // support json encoded bodies
-        server.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+        function middleware ( before, after ) {
+            if ( before.constructor.name.indexOf("Array") > -1 ) for ( let j=0; j < before.length; j++ ) server.use(before[j]);
+            server.use(express.static(self.workingDirectory + "/public"));
+            server.use(bodyParser.json()); // support json encoded bodies
+            server.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+            if ( after.constructor.name.indexOf("Array") > -1 ) for ( let j=0; j < after.length; j++ ) server.use(after[j]);
+        }
         
-        // views is directory for all template files
-        server.set("views", this.workingDirectory + "/views");
-        server.set("view engine", "ejs");
+        function start () {
+            server.listen(server.get("port"), () => {
+                self.__importantLogger("Server initialized! Running on port", server.get("port"));
+            });
+        }
         
         // futher setup can be manually programmed
-        if ( typeof setUpFunction !== "undefined" ) try { this.logger("Running custom setup function(s)..."); setUpFunction.call(this, server); } catch (err) { this.logger(err) }
-        
-        server.listen(server.get("port"), () => {
-            this.logger("Server initialized! Running on port", server.get("port"));
-        });
+        if ( typeof setUpFunction !== "undefined" ) {
+            try {
+                this.logger("Running custom setup function(s)...");
+                setUpFunction.apply(this, [server, express, init, middleware, start]);
+            }
+            catch (err) { this.logger(err); }
+        }
+        else {
+            init();
+            middleware();
+            start();
+        }
         
         this.server = server;
         
@@ -356,9 +379,7 @@ let App = (function ( grabPluginFrom ) {
     constructor.prototype.generateID =
     constructor.prototype.regenerateID = function () {
         
-        this.id = this.generateUUID();
-        
-        return this;
+        return (this.id = this.generateUUID()) && this;
         
     };
     
@@ -461,5 +482,3 @@ let App = (function ( grabPluginFrom ) {
     return constructor;
     
 }(require));
-
-module.exports = App;
