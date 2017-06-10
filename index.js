@@ -134,11 +134,11 @@ module.exports = (function ( grabPluginFrom ) {
     /* TODO: write generic get function that .get and .getJSONFrom can derive from and extend */
     
     /** App.getJSONFrom
-     *  @param {Array, String}
-     *  @param {Array, Object}
+     *  @param {Array||String}
+     *  @param {Array||Object}
      *  @param {Boolean}
      *  @public, method
-     *  @return {Array, App}
+     *  @return {Array||App}
      */ 
     
     constructor.prototype.getJSONFrom = function ( hrefs, headers, transformationFunction, returnSelf ) {
@@ -271,7 +271,7 @@ module.exports = (function ( grabPluginFrom ) {
             
             edPlug.apply(this, ["enable", name, toExtend, callback]);
         } catch ( e ) {
-            console.log("[PluginError in App.enablePlugin]", e);
+            console.log("PluginError in App.enablePlugin\n", e);
         }
         
         return this;
@@ -311,6 +311,41 @@ module.exports = (function ( grabPluginFrom ) {
     
     constructor.prototype.plugin = constructor.prototype.plugins.enabled;
     
+    /* Handling */
+    
+    /**
+     * 
+     */
+    
+    constructor.prototype.promise =
+    constructor.prototype.defer =
+    constructor.prototype.try = function ( funct ) {
+        let self = this;
+        return new Promise ((resolve, reject) => {
+            let retData;
+            try { retData = funct.call(self); } catch (e) { return reject(e); }
+            resolve(retData);
+        });
+    };
+    
+    /* Processing */
+    
+    /**
+     * 
+     */
+    
+    constructor.prototype.parallel = function () {
+        
+        let promises = [];
+        
+        for ( let key in arguments ) {
+            if ( typeof arguments[key] === "function" ) promises.push(this.try(arguments[key]));
+        }
+        
+        return Promise.all(promises);
+        
+    };
+    
     /* Server */
     
     /** App.startServer
@@ -326,6 +361,43 @@ module.exports = (function ( grabPluginFrom ) {
         
         let server = express();
         let self = this;
+        
+        /* Catch errors */
+        
+        let _get = server.get,
+            _post = server.post,
+            _all = server.all;
+        
+        server.get = function () {
+            
+            return tryCatch(_get, server, arguments);
+            
+        };
+        
+        server.post = function () {
+            
+            return tryCatch(_post, server, arguments);
+            
+        };
+        
+        server.all = function () {
+            
+            return tryCatch(_all, server, arguments);
+            
+        };
+        
+        function tryCatch ( funct, functSuper, args ) {
+            let returnValue;
+            try {
+                returnValue = funct.apply(functSuper, args);
+            } catch (e) {
+                console.log(e);
+                returnValue = functSuper;
+            }
+            return returnValue;
+        }
+        
+        /* Predefined setups */
         
         function init () {
             // port
