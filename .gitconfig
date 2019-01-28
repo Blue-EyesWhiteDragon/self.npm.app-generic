@@ -1,0 +1,21 @@
+# Ignore workspace files
+
+.workspace
+
+# Hide private and dev folders
+
+.dev
+.dev/*
+.private
+.hidden
+.hide
+
+# Hide node folders
+
+.npm
+.node
+.nodejs
+node_modules/
+npm/
+nodejs/
+node/
