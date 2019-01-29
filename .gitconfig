@@ -1,6 +1,7 @@
 # Ignore workspace files
 
 .workspace
+.vscode
 
 # Hide private and dev folders
 
@@ -19,6 +20,10 @@ test/*
 demo
 demo/
 demo/*
+old
+old/
+old/*
+old.*
 
 # Hide node folders
 
