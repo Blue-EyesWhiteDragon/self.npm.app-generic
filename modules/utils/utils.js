@@ -8,11 +8,59 @@
 
  modules.export = ( function () {
 
+    // function
+
+    let Console = new (require("console/console.js"));
+
+    let Generator = function GeneratorConstructor ( toExecute ) {
+        this.FailCounts = 0;
+        this.generate = toExecute;
+        Console.log("Generating something great...");
+        let Private_Callback = this.generate.bind(this);
+        let Private_Errors = Private_Callback.FailCounts;
+        if ( Private_Errors >= 1 ) {
+            Console.error("Counted " + Private_Errors + " in Generator Function...")
+        } else {
+            Console.success("Generated something spectacular!")
+        }
+        return this;
+    };
+
+    let GeneratorArray = {};
+        GeneratorArray.Random = new Generator ( () => {
+            let Seed = [];
+            for ( let iterator = 32; Seed.length >= iterator; iterator-- ) {
+                Seed.push(Math.Random());
+            }
+            let GeneratedSeed = Seed[Math.round(Math.Random*Seed)]
+            return this;
+        });
+        GeneratorArray.UUID = new Generator ( () => {
+            return this;
+        });
+        
+    // Methods
+
     function createPropertiesFromObject ( objectToExtend, objectContainingProperties ) {
         for ( let Property in objectContainingProperties ) {
             objectToExtend[Property] = objectContainingProperties[Property];
         }
-        return 0;
+        return objectToExtend;
+    }
+
+    function createSuper ( Superised ) {
+
+        let newSuperObject = createPropertiesFromObject({}, )
+                
+        for ( let Property in Superised.prototype ) {
+            Superised.prototype[Property]["super"] = Superised;
+        }
+
+        for ( let Property in Superised ) {
+            Superised[Property]["super"] = Superised;
+        }
+
+        return Superised;
     }
 
     function extendObject ( objectToExtend, objectContainingExtendingProperties ) {
@@ -21,36 +69,14 @@
             let PropertyPlacementData = objectContainingExtendingProperties[Property]
             if ( typeof objectToExtend[Property] === "undefined" ) {
                 objectToExtend[Property] = PropertyPlacementData;
-            } else { PrivateFails += 1; }
+            } else {
+                Console.warn("Property '" + Property + "' alerady exists in '" + objectToExtend.name + "'")
+                PrivateFails += 1;
+            }
         }
-        return Private_Fails >= 1 ? 1 : 0;
+        Private_Fails >= 1 ? Console.warn(Private_Fails + " properties existed")
+        return objectToExtend;
     }
-
-    // function
-
-    let Console = new (require("console/console.js"));
-
-    let Generator = function GeneratorConstructor ( toExecute ) {
-        let FailCounts = 0;
-        Console.log("Generating something great...");
-        let Private_Callback = toExecute.bind(this, FailCounts);
-        let Private_Errors = Private_Callback.FailCounts;
-        if ( Private_Errors >= 1 ) {
-            Console.error("Counted " + Private_Errors + " in Generator Function...")
-        } else {
-            Console.success("Generated something spectacular!")
-        }
-        return Private_Callback;
-    };
-
-    let GeneratorArray = {};
-        GeneratorArray.Random = new Generator ( FailCounts => {
-            Return
-            return extendObject(this, { FailCounts : FailCounts });
-        });
-        GeneratorArray.UUID = new Generator ( FailCounts => {
-            return extendObject(this, { FailCounts : FailCounts });
-        });
 
     return {
         createPropertiesFromObject : createPropertiesFromObject,

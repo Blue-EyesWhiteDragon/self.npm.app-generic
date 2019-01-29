@@ -6,9 +6,13 @@
 
  "use strict";
 
- let App = new require("./index.js")({
+ let App = require("./index.js");
+ let App = new App({
     name : "DEMO",
-    id : App.Utils.generate.UUID("DEMO"),
+    id : App.Utils.generate.UUID({
+      tag : "DEMO",
+      seed : App.Utils
+    }),
     port : 80
  });
 

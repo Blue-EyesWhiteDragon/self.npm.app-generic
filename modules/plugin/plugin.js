@@ -16,6 +16,7 @@ module.exports = ( function () {
 
 let Plugin = function ( configObject ) {
     this.sessionID = Utils.generator.UUID( Utils.Random().Seed );
+    Utils.extendObject(this, configObject);
     return this;
 };
 

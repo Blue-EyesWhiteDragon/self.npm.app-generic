@@ -6,14 +6,8 @@
 
 "use strict";
 
-let App = ( function ( core ) {
-    let self = function App () {
-        return this;
-    };
-    self.constructor = core.constructor;
-    self.prototype = core.prototype;
-    self.constructor.name = "App";
-    return self;
-}) ( new ( require("modules/core/core.js") ) );
+let App = ( function ( Core ) {
+    new Core();
+}) ( require("modules/core/core.js") );
 
 module.exports = App;

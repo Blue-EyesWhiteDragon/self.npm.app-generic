@@ -15,26 +15,24 @@ let Utils = require("./utils/Utils.js");
 module.exports = ( function () {
 
 let Core = function Core () {
+    Utils.createSuperObject(this);
     return this;
 };
 
-// Core = super; \\
-
-for ( let Property in Core.prototype ) {
-    Core.prototype[Property]["super"] = Core;
-}
-
-for ( let Property in Core ) {
-    Core[Property]["super"] = Core;
-}
-
-    Core.prototype.Server = new require ("../server/server.js");
-
+    Core.console = Utils.console;
+    Core.id =
+    Core.sessionID =
+    Core.UUID = Utils.generate.UUID();
     Core.plugin = {
-        load : function () {
-
+        load : function PluginManager () {
+            
         }
     };
+
+    Core.utils = Utils;
+
+    Core.prototype.Plugin = require("../plugin/plugin.js");
+    Core.prototype.Server = require("../server/server.js");
 
 return Core;
 
