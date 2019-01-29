@@ -1,0 +1,39 @@
+# Ignore workspace files
+
+.workspace
+.code-workspace
+.vscode
+.vscode/
+.vscode/*
+
+# Hide private and dev folders
+
+.dev
+.dev/*
+.private
+.hidden
+.hide
+.test
+.test/*
+test
+test/
+test/*
+.demo
+.demo/*
+demo
+demo/
+demo/*
+old
+old/
+old/*
+old.*
+
+# Hide node folders
+
+.npm
+.node
+.nodejs
+node_modules/
+npm/
+nodejs/
+node/
