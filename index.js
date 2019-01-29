@@ -13,6 +13,7 @@ let App = ( function ( core ) {
     self.constructor = core.constructor;
     self.prototype = core.prototype;
     self.constructor.name = "App";
-}) (new (require("modules/core/core.js")));
+    return self;
+}) ( new ( require("modules/core/core.js") ) );
 
 module.exports = App;

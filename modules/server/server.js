@@ -14,6 +14,10 @@ let Utils = require("./utils/Utils.js");
 
 module.exports = ( function () {
 
+let Server = function Server () {
 
+};
+
+return Server;
 
 }) ();
