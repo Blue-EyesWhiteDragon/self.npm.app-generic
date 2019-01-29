@@ -9,6 +9,16 @@
 .private
 .hidden
 .hide
+.test
+.test/*
+test
+test/
+test/*
+.demo
+.demo/*
+demo
+demo/
+demo/*
 
 # Hide node folders
 
